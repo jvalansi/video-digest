@@ -27,22 +27,32 @@ Also use **Cloudflare Radar `trending_rise`** to catch domains with sudden traff
 - API: `GET /radar/ranking/top?rankingType=trending_rise`
 - Useful as a leading indicator — a domain spiking often means something happened
 
-### Step 2 — Filter to Content Publishers
+### Step 2 — Route Each Domain to the Right Fetcher
 
-Many top sites are platforms, not content sources (Google, YouTube, Facebook, etc.).
-Filter by Cloudflare category to keep only:
-- News & Media
-- Science & Technology blogs
-- Finance / Business news
+Top sites fall into two buckets:
 
-Exclude: Search Engines, Social Media Networks, Streaming, Ecommerce.
+**Known platforms — use their dedicated API/feed:**
 
-### Step 3 — Pull Headlines via RSS
+| Platform | Signal to pull |
+|---|---|
+| google.com | Google Trends — trending searches |
+| youtube.com | YouTube Data API — trending videos |
+| reddit.com | Top posts per relevant subreddit |
+| x.com | Trending topics |
+| wikipedia.org | Trending pages |
+| facebook.com | Skip — no useful public content API |
 
-For each publisher domain:
-1. Auto-discover RSS feed (try `/feed`, `/rss`, `/atom.xml`, etc.)
+**Unknown content publishers — auto-discover RSS:**
+1. Try common feed paths (`/feed`, `/rss`, `/atom.xml`, etc.)
 2. Fetch latest headlines + summaries
 3. Tag each item with source domain and category
+
+### Step 3 — Normalize to Common Format
+
+All sources output the same structure:
+```json
+{ "title": "...", "summary": "...", "url": "...", "source": "...", "category": "...", "fetched_at": "..." }
+```
 
 ---
 
