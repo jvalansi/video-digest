@@ -27,10 +27,10 @@ BASE = "https://www.googleapis.com/youtube/v3"
 DEFAULT_CHANNELS = [
     {"id": "UCsBjURrPoezykLs9EqgamOA", "name": "Fireship"},
     {"id": "UCXuqSBlHAE6Xw-yeJA0Tunw",  "name": "Linus Tech Tips"},
-    {"id": "UCnUYZLuoy1rq1aVMwx4aTzw",  "name": "Theo (t3.gg)"},
+    {"id": "UCbmNph6atAoGfqLoCL_duAg",  "name": "Theo (t3.gg)"},
     {"id": "UC8butISFwT-Wl7EV0hUK0BQ",  "name": "freeCodeCamp"},
-    {"id": "UCVls1GmFKf6WlTraIb_IaJg",  "name": "Distro Tube"},
     {"id": "UCddiUEpeqJcYeBxX1IVBKvQ",  "name": "ThePrimeagen"},
+    {"id": "UCo8bcnLyZH8tBIH9V1mLgqQ",  "name": "ByteByteGo"},
 ]
 
 
@@ -45,30 +45,56 @@ def api_get(endpoint: str, params: dict) -> dict:
         return json.loads(resp.read())
 
 
+def video_id(item: dict) -> str:
+    return item["id"]["videoId"] if isinstance(item["id"], dict) else item["id"]
+
+
 def normalize(item: dict, source: str) -> dict:
     snippet = item.get("snippet", {})
+    stats = item.get("statistics", {})
     published = snippet.get("publishedAt")
     return {
         "title": snippet.get("title", "").strip(),
         "summary": snippet.get("description", "")[:500],
-        "url": f"https://www.youtube.com/watch?v={item['id']['videoId'] if isinstance(item['id'], dict) else item['id']}",
+        "url": f"https://www.youtube.com/watch?v={video_id(item)}",
         "source": f"YouTube / {source}",
         "category": "tech",
         "thumbnail": snippet.get("thumbnails", {}).get("medium", {}).get("url"),
         "fetched_at": datetime.now(timezone.utc).isoformat(),
         "published_at": published,
+        "_view_count": int(stats.get("viewCount", 0) or 0),
+        "_like_count": int(stats.get("likeCount", 0) or 0),
     }
+
+
+def enrich_with_stats(items: list[dict]) -> list[dict]:
+    """Batch-fetch viewCount and likeCount for a list of items."""
+    ids = [video_id({"id": i["url"].split("v=")[-1]}) for i in items]
+    if not ids:
+        return items
+    data = api_get("videos", {
+        "part": "statistics",
+        "id": ",".join(ids),
+        "maxResults": 50,
+    })
+    stats_by_id = {v["id"]: v.get("statistics", {}) for v in data.get("items", [])}
+    for item in items:
+        vid = item["url"].split("v=")[-1]
+        stats = stats_by_id.get(vid, {})
+        item["_view_count"] = int(stats.get("viewCount", 0) or 0)
+        item["_like_count"] = int(stats.get("likeCount", 0) or 0)
+    return items
 
 
 def fetch_trending(category_id: str, limit: int) -> list[dict]:
     data = api_get("videos", {
-        "part": "snippet",
+        "part": "snippet,statistics",
         "chart": "mostPopular",
         "regionCode": "US",
         "videoCategoryId": category_id,
         "maxResults": min(limit, 50),
     })
-    return [normalize({"id": item["id"], "snippet": item["snippet"]}, "Trending") for item in data.get("items", [])]
+    return [normalize(item, "Trending") for item in data.get("items", [])]
 
 
 def fetch_channel(channel: dict, limit: int) -> list[dict]:
@@ -79,7 +105,8 @@ def fetch_channel(channel: dict, limit: int) -> list[dict]:
         "type": "video",
         "maxResults": min(limit, 50),
     })
-    return [normalize(item, channel["name"]) for item in data.get("items", []) if item.get("id", {}).get("videoId")]
+    items = [normalize(item, channel["name"]) for item in data.get("items", []) if item.get("id", {}).get("videoId")]
+    return enrich_with_stats(items)
 
 
 def main():
@@ -105,9 +132,11 @@ def main():
             except Exception as e:
                 print(f"  {channel['name']}: ERROR — {e}", file=sys.stderr)
 
-    # YouTube has no engagement count in these endpoints — assign 0
+    # Score using view count as engagement signal; remove private fields
     for item in results:
-        item["engagement"] = 0.0
+        item["score"] = item.pop("_view_count", 0)
+        item.pop("_like_count", None)
+    results = score_items(results, "YouTube", "score")
     print(json.dumps(results, indent=2, ensure_ascii=False))
 
 
