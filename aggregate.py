@@ -41,7 +41,7 @@ DEFAULT_AUTHORITY = 0.8
 FETCHERS = [
     {"cmd": ["python", "fetchers/rss.py", "--limit", "20"]},
     {"cmd": ["python", "fetchers/hn.py", "--feed", "top", "--limit", "30"]},
-    {"cmd": ["python", "fetchers/youtube.py", "--mode", "channels", "--limit", "5"]},
+    {"cmd": ["python", "fetchers/youtube.py", "--limit", "5"]},
     {"cmd": ["python", "fetchers/github.py", "--limit", "25"]},
 ]
 
