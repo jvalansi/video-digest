@@ -94,7 +94,7 @@ For each selected topic:
 ## Phase 5: Delivery
 
 - Drop videos to a shared folder / S3
-- Post links to Slack (`#proj-video-digest`)
+- Post links to Slack (`#proj-trend-digest`)
 - Run daily as a scheduled job (cron or systemd timer)
 
 ---
