@@ -19,6 +19,7 @@ import sys
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
+from stats import score_items
 
 BASE = "https://www.googleapis.com/youtube/v3"
 
@@ -104,6 +105,9 @@ def main():
             except Exception as e:
                 print(f"  {channel['name']}: ERROR — {e}", file=sys.stderr)
 
+    # YouTube has no engagement count in these endpoints — assign 0
+    for item in results:
+        item["engagement"] = 0.0
     print(json.dumps(results, indent=2, ensure_ascii=False))
 
 

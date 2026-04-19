@@ -14,6 +14,7 @@ import sys
 from datetime import datetime, timezone
 
 import feedparser
+from stats import score_items
 
 # Default tech feeds — can be overridden via --feeds
 DEFAULT_FEEDS = [
@@ -80,6 +81,9 @@ def main():
         except Exception as e:
             print(f"  {feed_def['source']}: ERROR — {e}", file=sys.stderr)
 
+    # RSS has no engagement signal — assign 0 for all items
+    for item in results:
+        item["engagement"] = 0.0
     print(json.dumps(results, indent=2, ensure_ascii=False))
 
 

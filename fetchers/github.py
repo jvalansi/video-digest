@@ -14,6 +14,7 @@ import re
 import sys
 import urllib.request
 from datetime import datetime, timezone
+from stats import score_items
 
 TRENDING_URL = "https://github.com/trending"
 GH_API = "https://api.github.com"
@@ -113,6 +114,11 @@ def main():
     else:
         print(f"  Fetching recently updated popular repos...", file=sys.stderr)
         results = fetch_releases(args.language, args.limit)
+
+    # Use stars_today as engagement signal (velocity), fall back to total stars
+    for item in results:
+        item["score"] = item.pop("stars_today") or item.pop("stars") or 0
+    results = score_items(results, "GitHub Trending", "score")
 
     print(f"  Got {len(results)} repos", file=sys.stderr)
     print(json.dumps(results, indent=2, ensure_ascii=False))

@@ -14,6 +14,7 @@ import sys
 import urllib.request
 from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from stats import score_items
 
 BASE = "https://hacker-news.firebaseio.com/v0"
 FEEDS = {
@@ -72,6 +73,7 @@ def main():
                 results.append(normalize(item))
 
     results.sort(key=lambda x: x["score"], reverse=True)
+    results = score_items(results, "Hacker News", "score")
     print(f"  Got {len(results)} stories", file=sys.stderr)
     print(json.dumps(results, indent=2, ensure_ascii=False))
 
