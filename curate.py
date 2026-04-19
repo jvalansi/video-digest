@@ -80,7 +80,7 @@ def curate(items: list[dict], limit: int, min_score: float) -> list[dict]:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", help="Read items from FILE instead of stdin")
-    parser.add_argument("--limit", type=int, default=10, help="Top N items after curation (default: 10)")
+    parser.add_argument("--limit", type=int, default=20, help="Top N items after curation (default: 20)")
     parser.add_argument("--min-score", type=float, default=0.4, help="Minimum relevance score to include (default: 0.4)")
     args = parser.parse_args()
 
