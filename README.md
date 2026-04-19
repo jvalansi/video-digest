@@ -12,50 +12,29 @@ A system that discovers trending topics across the web, curates them against a p
 
 ---
 
-## Source Research
+## Sources
 
-### Where developers actually get their news
-From the Stack Overflow 2025 Developer Survey (65k+ respondents):
+From the Stack Overflow 2025 Developer Survey (65k+ respondents), with API availability:
 
-| Platform | Usage |
-|---|---|
-| Stack Overflow | 84% |
-| GitHub | 67% |
-| YouTube | 61% |
-| Reddit | 54% |
-| Stack Exchange | 47% |
-| Discord | 39% |
-| LinkedIn | 37% |
-| Medium | 29% |
-| Hacker News | 20% |
-| X / Twitter | 17% |
-| Slack (public) | 16% |
-| Dev.to | 11% |
-| Bluesky | 11% |
-| Twitch | 9% |
-| Substack | 7% |
+| Platform | Developer Usage | API |
+|---|---|---|
+| Stack Overflow | 84% | ✅ Public API, no auth |
+| GitHub | 67% | ✅ Public API, no auth |
+| YouTube | 61% | ✅ API key configured |
+| Reddit | 54% | ⚠️ AWS IPs blocked; needs proxy or credentials |
+| Stack Exchange | 47% | ✅ Same API as Stack Overflow |
+| Discord | 39% | ⚠️ API is for server bots, not public content feeds |
+| LinkedIn | 37% | ❌ Very restricted |
+| Medium | 29% | ❌ No public API |
+| Hacker News | 20% | ✅ Free, no auth — Firebase REST API |
+| X / Twitter | 17% | ⚠️ API available but expensive |
+| Slack (public) | 16% | ❌ No public content API |
+| Dev.to | 11% | ✅ Free public API, no auth |
+| Bluesky | 11% | ✅ AT Protocol, no auth for public feeds |
+| Twitch | 9% | ⚠️ API exists but not relevant for tech news |
+| Substack | 7% | ⚠️ No official API; RSS feeds available per publication |
 
 Key insight: YouTube and Reddit both significantly outrank Hacker News among developers. HN is high-quality but niche (~20%).
-
-### API availability
-
-| Source | Status | Notes |
-|---|---|---|
-| Hacker News | ✅ Ready | Free, no auth — Firebase REST API |
-| YouTube | ✅ Ready | API key configured |
-| GitHub | ✅ Ready | No auth needed for public data |
-| Stack Overflow | ✅ Ready | Public API, no key needed for read |
-| Stack Exchange | ✅ Ready | Same API as Stack Overflow |
-| Dev.to | ✅ Ready | Free public API, no auth needed |
-| Bluesky | ✅ Ready | AT Protocol API, no auth for public feeds |
-| Discord | ⚠️ Limited | API is for bot/server interaction, not public content feeds |
-| Reddit | ⚠️ Blocked | AWS IPs blocked; needs proxy or approved credentials |
-| Substack | ⚠️ Limited | No official API; RSS feeds available per publication |
-| Twitch | ⚠️ Limited | API exists but not relevant for tech news content |
-| Medium | ❌ | No useful public API |
-| LinkedIn | ❌ | Very restricted |
-| X / Twitter | ❌ | Paid API only |
-| Slack (public) | ❌ | No public content API |
 
 ### Reddit notes
 Reddit blocks requests from cloud/AWS IPs regardless of auth method.
